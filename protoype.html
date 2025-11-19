@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Sprint - Discovery Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .empresas-input {
+            min-height: 120px;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .result pre {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            background: #28a745;
+            width: auto;
+            padding: 10px 20px;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Benchmark Discovery Sprint</h1>
+        <p class="subtitle">Herramienta automatizada para generar análisis de benchmark competitivo</p>
+        
+        <form id="benchmarkForm">
+            <div class="form-group">
+                <label for="nombre_proyecto">Nombre del Proyecto *</label>
+                <input type="text" id="nombre_proyecto" name="nombre_proyecto" required 
+                       placeholder="ej: Plataforma EdTech B2B">
+            </div>
+            
+            <div class="form-group">
+                <label for="industria">Industria *</label>
+                <input type="text" id="industria" name="industria" required 
+                       placeholder="ej: Tecnología Educativa">
+            </div>
+            
+            <div class="form-group">
+                <label for="dominio">Dominio en la Industria *</label>
+                <input type="text" id="dominio" name="dominio" required 
+                       placeholder="ej: Formación corporativa B2B">
+            </div>
+            
+            <div class="form-group">
+                <label for="num_empresas">Número Total de Empresas *</label>
+                <input type="number" id="num_empresas" name="num_empresas" required min="1" max="20" value="5">
+            </div>
+            
+            <div class="form-group">
+                <label for="criterio_seleccion">Criterio de Selección *</label>
+                <textarea id="criterio_seleccion" name="criterio_seleccion" required 
+                          placeholder="ej: Empresas líderes en gamificación y microlearning con presencia global"></textarea>
+                <div class="hint">Explica por qué has elegido estas empresas</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="empresas">Lista de Empresas Seleccionadas *</label>
+                <textarea id="empresas" name="empresas" required class="empresas-input"
+                          placeholder="Una empresa por línea:&#10;Coursera for Business&#10;Degreed&#10;EdCast&#10;Docebo&#10;360Learning"></textarea>
+                <div class="hint">Escribe una empresa por línea</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="estructura_analisis">Estructura de Análisis *</label>
+                <textarea id="estructura_analisis" name="estructura_analisis" required
+                          placeholder="ej: Enfocarse en modelo de negocio, stack tecnológico, propuesta de valor única y casos de éxito destacados"></textarea>
+                <div class="hint">Indica en qué aspectos quieres que se enfoque el análisis</div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Generar Benchmark</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">Generando análisis... Esto puede tardar 30-60 segundos</p>
+        </div>
+        
+        <div class="result" id="result">
+            <h2>✅ Benchmark Generado</h2>
+            <pre id="markdown"></pre>
+            <button class="download-btn" onclick="downloadMarkdown()">📥 Descargar Markdown</button>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('benchmarkForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+        const markdownOutput = document.getElementById('markdown');
+        
+        let generatedMarkdown = '';
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Obtener valores del formulario
+            const formData = {
+                nombre_proyecto: document.getElementById('nombre_proyecto').value,
+                industria: document.getElementById('industria').value,
+                dominio: document.getElementById('dominio').value,
+                num_empresas: parseInt(document.getElementById('num_empresas').value),
+                criterio_seleccion: document.getElementById('criterio_seleccion').value,
+                empresas: document.getElementById('empresas').value.split('\n').filter(e => e.trim() !== ''),
+                estructura_analisis: document.getElementById('estructura_analisis').value
+            };
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                // IMPORTANTE: Cambia esta URL por la de tu webhook de n8n
+                const webhookURL = 'TU_URL_DE_N8N_AQUI';
+                
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                
+                generatedMarkdown = await response.text();
+                
+                // Mostrar resultado
+                markdownOutput.textContent = generatedMarkdown;
+                result.style.display = 'block';
+                
+            } catch (error) {
+                alert('Error al generar el benchmark: ' + error.message);
+                console.error('Error:', error);
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function downloadMarkdown() {
+            const blob = new Blob([generatedMarkdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'benchmark_' + Date.now() + '.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
